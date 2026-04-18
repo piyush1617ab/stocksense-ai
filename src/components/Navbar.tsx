@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { TrendingUp, MessageCircle, Home, BookOpen, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { TrendingUp, MessageCircle, Home, BookOpen, Menu, X, Wallet, User as UserIcon, LogIn } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
-const links = [
+const baseLinks = [
   { to: "/", label: "Home", icon: Home },
   { to: "/learn", label: "Learn", icon: BookOpen },
   { to: "/chatbot", label: "AI Chat", icon: MessageCircle },
@@ -10,7 +11,13 @@ const links = [
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const links = user
+    ? [...baseLinks, { to: "/portfolio", label: "Portfolio", icon: Wallet }]
+    : baseLinks;
 
   return (
     <header className="sticky top-0 z-50 border-b glass">
@@ -40,6 +47,29 @@ const Navbar = () => {
               {label}
             </Link>
           ))}
+
+          <div className="ml-2 pl-2 border-l">
+            {user ? (
+              <button
+                onClick={() => navigate("/profile")}
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
+                aria-label="Open profile"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full gradient-primary text-xs font-bold text-primary-foreground">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+                <span className="hidden lg:inline">{user.name}</span>
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-2 rounded-lg gradient-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-95"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign in
+              </Link>
+            )}
+          </div>
         </nav>
 
         {/* Mobile toggle */}
@@ -69,6 +99,27 @@ const Navbar = () => {
               {label}
             </Link>
           ))}
+          <div className="mt-2 border-t pt-2">
+            {user ? (
+              <Link
+                to="/profile"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground hover:bg-accent"
+              >
+                <UserIcon className="h-4 w-4" />
+                {user.name}
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 rounded-lg gradient-primary px-4 py-3 text-sm font-semibold text-primary-foreground"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign in
+              </Link>
+            )}
+          </div>
         </nav>
       )}
     </header>
