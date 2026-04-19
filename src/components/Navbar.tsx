@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { TrendingUp, MessageCircle, Home, BookOpen, Menu, X, Wallet, User as UserIcon, LogIn } from "lucide-react";
+import { TrendingUp, MessageCircle, Home, BookOpen, Menu, X, Wallet, User as UserIcon, LogIn, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const baseLinks = [
   { to: "/", label: "Home", icon: Home },
@@ -13,6 +14,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const links = user
@@ -48,11 +50,19 @@ const Navbar = () => {
             </Link>
           ))}
 
-          <div className="ml-2 pl-2 border-l">
+          <div className="ml-2 flex items-center gap-1 pl-2 border-l">
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent/20 hover:text-foreground"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
             {user ? (
               <button
                 onClick={() => navigate("/profile")}
-                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
+                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent/20"
                 aria-label="Open profile"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full gradient-primary text-xs font-bold text-primary-foreground">
@@ -72,13 +82,25 @@ const Navbar = () => {
           </div>
         </nav>
 
-        {/* Mobile toggle */}
-        <button
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        {/* Mobile actions */}
+        <div className="flex items-center gap-1 md:hidden">
+          <button
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent/20 hover:text-foreground"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+          <button
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent/20"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+
+        {/* Mobile toggle removed — now lives in header row above */}
       </div>
 
       {/* Mobile nav */}
