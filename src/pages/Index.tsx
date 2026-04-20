@@ -71,6 +71,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Personalized "For You" feed */}
+      <PersonalizedFeed />
+
       {/* Market Overview */}
       <section className="container mx-auto px-4 pb-12">
         <div className="flex items-center justify-between mb-4">

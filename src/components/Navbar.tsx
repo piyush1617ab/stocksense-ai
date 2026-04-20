@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { TrendingUp, MessageCircle, Home, BookOpen, Menu, X, Wallet, User as UserIcon, LogIn, Moon, Sun } from "lucide-react";
+import { TrendingUp, MessageCircle, Home, BookOpen, Menu, X, Wallet, User as UserIcon, LogIn, Moon, Sun, Star, Search } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -8,6 +8,7 @@ const baseLinks = [
   { to: "/", label: "Home", icon: Home },
   { to: "/learn", label: "Learn", icon: BookOpen },
   { to: "/chatbot", label: "AI Chat", icon: MessageCircle },
+  { to: "/watchlist", label: "Watchlist", icon: Star },
 ];
 
 const Navbar = () => {
