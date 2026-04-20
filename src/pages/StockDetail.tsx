@@ -3,22 +3,18 @@ import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Brain, Newspa
 import Navbar from "@/components/Navbar";
 import InsightCard from "@/components/InsightCard";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
-import { stockDetails } from "@/data/dummyData";
-import { useState, useEffect } from "react";
+import PriceChart from "@/components/charts/PriceChart";
+import StockExplainer from "@/components/learning/StockExplainer";
+import LearningPath from "@/components/learning/LearningPath";
+import WatchlistButton from "@/components/watchlist/WatchlistButton";
+import GlossaryTerm from "@/components/glossary/GlossaryTerm";
+import { useStock } from "@/hooks/useStock";
 
 const StockDetail = () => {
   const { symbol } = useParams<{ symbol: string }>();
-  const [loading, setLoading] = useState(true);
+  const { data: stock, isLoading } = useStock(symbol);
 
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, [symbol]);
-
-  const stock = symbol ? stockDetails[symbol.toUpperCase()] : null;
-
-  if (!stock) {
+  if (!isLoading && !stock) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -41,8 +37,8 @@ const StockDetail = () => {
     );
   }
 
-  const isPositive = stock.change >= 0;
-  const TrendIcon = stock.trendType === "success" ? TrendingUp : stock.trendType === "danger" ? TrendingDown : Minus;
+  const isPositive = stock ? stock.change >= 0 : true;
+  const TrendIcon = stock?.trendType === "success" ? TrendingUp : stock?.trendType === "danger" ? TrendingDown : Minus;
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,7 +51,7 @@ const StockDetail = () => {
           <ArrowLeft className="h-4 w-4" /> Back to stocks
         </Link>
 
-        {loading ? (
+        {isLoading || !stock ? (
           <LoadingSkeleton type="detail" />
         ) : (
           <div className="animate-fade-in space-y-8">
@@ -67,7 +63,10 @@ const StockDetail = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">{stock.name}</p>
-                  <h1 className="text-3xl font-bold text-foreground">{stock.symbol}</h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-3xl font-bold text-foreground">{stock.symbol}</h1>
+                    <WatchlistButton symbol={stock.symbol} variant="filled" stopPropagation={false} />
+                  </div>
                 </div>
               </div>
               <div className="text-right">
@@ -83,23 +82,8 @@ const StockDetail = () => {
               </div>
             </div>
 
-            {/* Chart Placeholder */}
-            <div className="flex h-64 items-center justify-center rounded-2xl border bg-card shadow-sm overflow-hidden relative">
-              {/* Simulated chart lines */}
-              <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 400 200" preserveAspectRatio="none">
-                <polyline
-                  points="0,150 30,140 60,120 90,130 120,100 150,110 180,80 210,90 240,60 270,75 300,50 330,40 360,55 400,30"
-                  fill="none"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth="2"
-                />
-              </svg>
-              <div className="text-center text-muted-foreground z-10">
-                <BarChart3 className="mx-auto mb-2 h-10 w-10 opacity-40" />
-                <p className="text-sm font-medium">Interactive chart — connect your API</p>
-                <p className="text-xs mt-1">Placeholder for TradingView or Recharts integration</p>
-              </div>
-            </div>
+            {/* Interactive price chart */}
+            <PriceChart symbol={stock.symbol} positive={isPositive} />
 
             {/* Key Insights */}
             <div>
@@ -114,20 +98,33 @@ const StockDetail = () => {
                 />
                 <InsightCard
                   icon={<Activity className="h-5 w-5" />}
-                  label="RSI (14)"
+                  label={(<><GlossaryTerm termKey="rsi">RSI</GlossaryTerm> (14)</>) as unknown as string}
                   value={stock.rsi.toString()}
                   description={stock.rsi > 70 ? "Overbought zone" : stock.rsi < 30 ? "Oversold zone" : "Neutral range"}
                   variant={stock.rsi > 70 ? "danger" : stock.rsi < 30 ? "success" : "neutral"}
                 />
                 <InsightCard
                   icon={<BarChart3 className="h-5 w-5" />}
-                  label="50-Day MA"
+                  label={(<>50-Day <GlossaryTerm termKey="ma">MA</GlossaryTerm></>) as unknown as string}
                   value={`₹${stock.movingAvg.toLocaleString()}`}
                   description={stock.price > stock.movingAvg ? "Price above MA (bullish)" : "Price below MA (bearish)"}
                   variant={stock.price > stock.movingAvg ? "success" : "danger"}
                 />
               </div>
             </div>
+
+            {/* Explain to me — beginner mode */}
+            <StockExplainer
+              symbol={stock.symbol}
+              name={stock.name}
+              rsi={stock.rsi}
+              price={stock.price}
+              movingAvg={stock.movingAvg}
+              trend={stock.trend}
+            />
+
+            {/* Learning path */}
+            <LearningPath symbol={stock.symbol} name={stock.name} />
 
             {/* AI Explanation */}
             <div>
