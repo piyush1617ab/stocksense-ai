@@ -53,6 +53,18 @@ const Navbar = () => {
 
           <div className="ml-2 flex items-center gap-1 pl-2 border-l">
             <button
+              onClick={() => {
+                window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
+              }}
+              aria-label="Open command palette"
+              title="Search (⌘K)"
+              className="hidden lg:inline-flex h-9 items-center gap-2 rounded-lg border bg-background/50 px-2.5 text-xs text-muted-foreground transition-colors hover:bg-accent/20 hover:text-foreground"
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span>Search</span>
+              <kbd className="ml-1 rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
+            </button>
+            <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
               title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
