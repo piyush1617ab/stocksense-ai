@@ -6,6 +6,7 @@ import SearchBar from "@/components/SearchBar";
 import StockCard from "@/components/StockCard";
 import MarketOverview from "@/components/MarketOverview";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import PersonalizedFeed from "@/components/PersonalizedFeed";
 import { popularStocks } from "@/data/dummyData";
 import heroBg from "@/assets/hero-bg.jpg";
 
