@@ -98,14 +98,14 @@ const StockDetail = () => {
                 />
                 <InsightCard
                   icon={<Activity className="h-5 w-5" />}
-                  label={(<><GlossaryTerm termKey="rsi">RSI</GlossaryTerm> (14)</>) as unknown as string}
+                  label={<><GlossaryTerm termKey="rsi">RSI</GlossaryTerm> (14)</>}
                   value={stock.rsi.toString()}
                   description={stock.rsi > 70 ? "Overbought zone" : stock.rsi < 30 ? "Oversold zone" : "Neutral range"}
                   variant={stock.rsi > 70 ? "danger" : stock.rsi < 30 ? "success" : "neutral"}
                 />
                 <InsightCard
                   icon={<BarChart3 className="h-5 w-5" />}
-                  label={(<>50-Day <GlossaryTerm termKey="ma">MA</GlossaryTerm></>) as unknown as string}
+                  label={<>50-Day <GlossaryTerm termKey="ma">MA</GlossaryTerm></>}
                   value={`₹${stock.movingAvg.toLocaleString()}`}
                   description={stock.price > stock.movingAvg ? "Price above MA (bullish)" : "Price below MA (bearish)"}
                   variant={stock.price > stock.movingAvg ? "success" : "danger"}

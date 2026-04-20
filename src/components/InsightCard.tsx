@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 interface InsightCardProps {
   icon: ReactNode;
-  label: string;
+  label: ReactNode;
   value: string;
   description?: string;
   variant?: "success" | "danger" | "neutral";
