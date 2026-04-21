@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { TrendingUp, MessageCircle, Home, BookOpen, Menu, X, Wallet, User as UserIcon, LogIn, Moon, Sun, Star, Search } from "lucide-react";
+import { TrendingUp, MessageCircle, Home, BookOpen, Menu, X, Wallet, User as UserIcon, LogIn, Moon, Sun, Star, Search, ArrowLeftRight, Layers } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import NotificationsPanel from "@/components/NotificationsPanel";
 
 const baseLinks = [
   { to: "/", label: "Home", icon: Home },
   { to: "/learn", label: "Learn", icon: BookOpen },
   { to: "/chatbot", label: "AI Chat", icon: MessageCircle },
   { to: "/watchlist", label: "Watchlist", icon: Star },
+  { to: "/compare", label: "Compare", icon: ArrowLeftRight },
+  { to: "/sectors", label: "Sectors", icon: Layers },
 ];
 
 const Navbar = () => {
@@ -64,6 +67,7 @@ const Navbar = () => {
               <span>Search</span>
               <kbd className="ml-1 rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
             </button>
+            <NotificationsPanel />
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
