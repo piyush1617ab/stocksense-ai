@@ -6,6 +6,8 @@ import LoadingSkeleton from "@/components/LoadingSkeleton";
 import PriceChart from "@/components/charts/PriceChart";
 import StockExplainer from "@/components/learning/StockExplainer";
 import LearningPath from "@/components/learning/LearningPath";
+import StockAnalysis from "@/components/StockAnalysis";
+import PriceAlertButton from "@/components/PriceAlertButton";
 import WatchlistButton from "@/components/watchlist/WatchlistButton";
 import GlossaryTerm from "@/components/glossary/GlossaryTerm";
 import { useStock } from "@/hooks/useStock";
@@ -66,6 +68,7 @@ const StockDetail = () => {
                   <div className="flex items-center gap-2">
                     <h1 className="text-3xl font-bold text-foreground">{stock.symbol}</h1>
                     <WatchlistButton symbol={stock.symbol} variant="filled" stopPropagation={false} />
+                    <PriceAlertButton symbol={stock.symbol} currentPrice={stock.price} />
                   </div>
                 </div>
               </div>
@@ -125,6 +128,9 @@ const StockDetail = () => {
 
             {/* Learning path */}
             <LearningPath symbol={stock.symbol} name={stock.name} />
+
+            {/* Deep Analysis — Buy or Not? */}
+            <StockAnalysis stock={stock} />
 
             {/* AI Explanation */}
             <div>
