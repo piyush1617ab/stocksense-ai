@@ -16,6 +16,8 @@ import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import Portfolio from "./pages/Portfolio.tsx";
 import Watchlist from "./pages/Watchlist.tsx";
+import Compare from "./pages/Compare.tsx";
+import SectorExplorer from "./pages/SectorExplorer.tsx";
 import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -47,6 +49,8 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/watchlist" element={<Watchlist />} />
+                <Route path="/compare" element={<Compare />} />
+                <Route path="/sectors" element={<SectorExplorer />} />
                 <Route
                   path="/portfolio"
                   element={
