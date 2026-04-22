@@ -232,3 +232,13 @@
   border-radius: 0.25rem;
   font-size: 0.85em;
 }
+
+/* App loader bar animation */
+@keyframes loaderBar {
+  0% { transform: scaleX(0); }
+  50% { transform: scaleX(0.7); }
+  100% { transform: scaleX(1); }
+}
+.animate-loader-bar {
+  animation: loaderBar 1.5s ease-in-out infinite;
+}
