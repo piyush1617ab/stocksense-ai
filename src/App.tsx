@@ -8,6 +8,8 @@ import { PortfolioProvider } from "@/context/PortfolioContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import CommandPalette from "@/components/CommandPalette";
+import AppLoader from "@/components/AppLoader";
+import { useAppReady } from "@/hooks/useAppReady";
 import Index from "./pages/Index.tsx";
 import StockDetail from "./pages/StockDetail.tsx";
 import Chatbot from "./pages/Chatbot.tsx";
@@ -31,6 +33,44 @@ const queryClient = new QueryClient({
   },
 });
 
+const AppContent = () => {
+  const ready = useAppReady();
+
+  return (
+    <AppLoader ready={ready}>
+      <CommandPalette />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/stock/:symbol" element={<StockDetail />} />
+        <Route path="/chatbot" element={<Chatbot />} />
+        <Route path="/learn" element={<Learn />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/watchlist" element={<Watchlist />} />
+        <Route path="/compare" element={<Compare />} />
+        <Route path="/sectors" element={<SectorExplorer />} />
+        <Route
+          path="/portfolio"
+          element={
+            <ProtectedRoute>
+              <Portfolio />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AppLoader>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -40,35 +80,7 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <PortfolioProvider>
-              <CommandPalette />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/stock/:symbol" element={<StockDetail />} />
-                <Route path="/chatbot" element={<Chatbot />} />
-                <Route path="/learn" element={<Learn />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/watchlist" element={<Watchlist />} />
-                <Route path="/compare" element={<Compare />} />
-                <Route path="/sectors" element={<SectorExplorer />} />
-                <Route
-                  path="/portfolio"
-                  element={
-                    <ProtectedRoute>
-                      <Portfolio />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <AppContent />
             </PortfolioProvider>
           </AuthProvider>
         </BrowserRouter>
