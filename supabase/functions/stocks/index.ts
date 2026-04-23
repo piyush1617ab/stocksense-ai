@@ -202,8 +202,7 @@ async function quote(symbol: string, exchange?: string) {
 }
 
 // ---------- HISTORY ----------
-async function historyYahoo(symbol: string, exchange: string, range: RangeKey) {
-  const ySym = yfSymbol(symbol, exchange);
+async function historyYahooSymbol(ySym: string, range: RangeKey) {
   const cfg = YF_RANGE[range] ?? YF_RANGE["1M"];
   const url = `${YF_CHART}/${encodeURIComponent(ySym)}?range=${cfg.range}&interval=${cfg.interval}`;
   const res = await fetch(url, { headers: UA });
@@ -216,6 +215,20 @@ async function historyYahoo(symbol: string, exchange: string, range: RangeKey) {
   return ts
     .map((t, i) => ({ date: new Date(t * 1000).toISOString(), close: closes[i] }))
     .filter((p): p is { date: string; close: number } => typeof p.close === "number");
+}
+
+async function historyYahoo(symbol: string, exchange: string, range: RangeKey) {
+  const primary = yfSymbol(symbol, exchange);
+  try {
+    return await historyYahooSymbol(primary, range);
+  } catch (e) {
+    if (exchange === "NSE" || exchange === "BSE") {
+      const alt = yfSymbol(symbol, exchange === "NSE" ? "BSE" : "NSE");
+      console.warn(`[history] ${primary} failed (${(e as Error).message}), trying ${alt}`);
+      return await historyYahooSymbol(alt, range);
+    }
+    throw e;
+  }
 }
 
 async function historyTD(symbol: string, exchange: string | undefined, range: RangeKey) {
