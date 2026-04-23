@@ -122,28 +122,34 @@ async function search(q: string) {
 // ---------- QUOTE ----------
 async function quoteYahoo(symbol: string, exchange: string) {
   const ySym = yfSymbol(symbol, exchange);
-  const url = `${YF_QUOTE}?symbols=${encodeURIComponent(ySym)}`;
+  // v7/finance/quote now requires a cookie+crumb. Use the public chart
+  // endpoint instead — its `meta` block has all the fields we need.
+  const url = `${YF_CHART}/${encodeURIComponent(ySym)}?range=1d&interval=1d`;
   const res = await fetch(url, { headers: UA });
   if (!res.ok) throw new Error(`Yahoo quote ${res.status}`);
   const data = await res.json();
-  const r = data?.quoteResponse?.result?.[0];
-  if (!r) throw new Error(`No data for ${ySym}`);
+  const r = data?.chart?.result?.[0];
+  const m = r?.meta;
+  if (!m) throw new Error(`No data for ${ySym}`);
+  const price = Number(m.regularMarketPrice ?? 0);
+  const prev = Number(m.chartPreviousClose ?? m.previousClose ?? price);
+  const change = price - prev;
   return {
     symbol: symbol.toUpperCase(),
-    name: r.longName || r.shortName || symbol.toUpperCase(),
+    name: m.longName || m.shortName || symbol.toUpperCase(),
     exchange,
-    price: Number(r.regularMarketPrice ?? 0),
-    change: Number(r.regularMarketChange ?? 0),
-    changePercent: Number(r.regularMarketChangePercent ?? 0),
-    high: Number(r.regularMarketDayHigh ?? r.regularMarketPrice ?? 0),
-    low: Number(r.regularMarketDayLow ?? r.regularMarketPrice ?? 0),
-    open: Number(r.regularMarketOpen ?? r.regularMarketPrice ?? 0),
-    volume: Number(r.regularMarketVolume ?? 0),
+    price,
+    change,
+    changePercent: prev ? (change / prev) * 100 : 0,
+    high: Number(m.regularMarketDayHigh ?? price),
+    low: Number(m.regularMarketDayLow ?? price),
+    open: Number(m.regularMarketOpen ?? price),
+    volume: Number(m.regularMarketVolume ?? 0),
     fiftyTwoWeek:
-      r.fiftyTwoWeekHigh && r.fiftyTwoWeekLow
-        ? { high: Number(r.fiftyTwoWeekHigh), low: Number(r.fiftyTwoWeekLow) }
+      m.fiftyTwoWeekHigh && m.fiftyTwoWeekLow
+        ? { high: Number(m.fiftyTwoWeekHigh), low: Number(m.fiftyTwoWeekLow) }
         : undefined,
-    currency: r.currency || "INR",
+    currency: m.currency || "INR",
   };
 }
 
