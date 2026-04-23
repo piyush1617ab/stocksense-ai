@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, TrendingUp, TrendingDown, Activity, BarChart3, Brain, Newspaper, Minus, ExternalLink } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import InsightCard from "@/components/InsightCard";
@@ -14,7 +14,9 @@ import { useStock } from "@/hooks/useStock";
 
 const StockDetail = () => {
   const { symbol } = useParams<{ symbol: string }>();
-  const { data: stock, isLoading } = useStock(symbol);
+  const [searchParams] = useSearchParams();
+  const exchange = searchParams.get("ex") || "NSE";
+  const { data: stock, isLoading } = useStock(symbol, exchange);
 
   if (!isLoading && !stock) {
     return (
@@ -152,22 +154,31 @@ const StockDetail = () => {
                 <Newspaper className="h-5 w-5 text-primary" /> Latest News
               </h2>
               <div className="space-y-3">
-                {stock.news.map((item, i) => (
-                  <div
-                    key={i}
-                    className="group flex items-center justify-between rounded-2xl border bg-card p-4 shadow-sm transition-all hover:shadow-md cursor-pointer"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                        {item.title}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {item.source} · {item.time}
-                      </p>
-                    </div>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-3" />
-                  </div>
-                ))}
+                {stock.news.map((item, i) => {
+                  const url = (item as { url?: string }).url;
+                  const content = (
+                    <>
+                      <div>
+                        <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                          {item.title}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {item.source} · {item.time}
+                        </p>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-3" />
+                    </>
+                  );
+                  const className =
+                    "group flex items-center justify-between rounded-2xl border bg-card p-4 shadow-sm transition-all hover:shadow-md cursor-pointer";
+                  return url ? (
+                    <a key={i} href={url} target="_blank" rel="noopener noreferrer" className={className}>
+                      {content}
+                    </a>
+                  ) : (
+                    <div key={i} className={className}>{content}</div>
+                  );
+                })}
               </div>
             </div>
           </div>
