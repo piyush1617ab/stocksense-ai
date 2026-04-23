@@ -120,10 +120,7 @@ async function search(q: string) {
 }
 
 // ---------- QUOTE ----------
-async function quoteYahoo(symbol: string, exchange: string) {
-  const ySym = yfSymbol(symbol, exchange);
-  // v7/finance/quote now requires a cookie+crumb. Use the public chart
-  // endpoint instead — its `meta` block has all the fields we need.
+async function quoteYahooSymbol(ySym: string, displaySymbol: string, exchange: string) {
   const url = `${YF_CHART}/${encodeURIComponent(ySym)}?range=1d&interval=1d`;
   const res = await fetch(url, { headers: UA });
   if (!res.ok) throw new Error(`Yahoo quote ${res.status}`);
@@ -135,8 +132,8 @@ async function quoteYahoo(symbol: string, exchange: string) {
   const prev = Number(m.chartPreviousClose ?? m.previousClose ?? price);
   const change = price - prev;
   return {
-    symbol: symbol.toUpperCase(),
-    name: m.longName || m.shortName || symbol.toUpperCase(),
+    symbol: displaySymbol.toUpperCase(),
+    name: m.longName || m.shortName || displaySymbol.toUpperCase(),
     exchange,
     price,
     change,
@@ -151,6 +148,22 @@ async function quoteYahoo(symbol: string, exchange: string) {
         : undefined,
     currency: m.currency || "INR",
   };
+}
+
+async function quoteYahoo(symbol: string, exchange: string) {
+  const primary = yfSymbol(symbol, exchange);
+  try {
+    return await quoteYahooSymbol(primary, symbol, exchange);
+  } catch (e) {
+    // Some Indian stocks are only listed on one exchange — try the other.
+    if (exchange === "NSE" || exchange === "BSE") {
+      const altEx = exchange === "NSE" ? "BSE" : "NSE";
+      const alt = yfSymbol(symbol, altEx);
+      console.warn(`[quote] ${primary} failed (${(e as Error).message}), trying ${alt}`);
+      return await quoteYahooSymbol(alt, symbol, altEx);
+    }
+    throw e;
+  }
 }
 
 async function quoteTD(symbol: string, exchange?: string) {
