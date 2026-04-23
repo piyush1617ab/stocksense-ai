@@ -9,7 +9,7 @@
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
 const TOKEN_KEY = import.meta.env.VITE_AUTH_TOKEN_KEY ?? "stocksense_token";
-export const USE_MOCKS = (import.meta.env.VITE_USE_MOCKS ?? "true") === "true";
+export const USE_MOCKS = (import.meta.env.VITE_USE_MOCKS ?? "false") === "true";
 
 export class ApiError extends Error {
   status: number;

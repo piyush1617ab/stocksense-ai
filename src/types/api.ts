@@ -14,7 +14,7 @@ export const NewsItemSchema = z.object({
   title: z.string(),
   source: z.string(),
   time: z.string(),
-  url: z.string().optional(),
+  url: z.string().url().optional(),
 });
 export type NewsItem = z.infer<typeof NewsItemSchema>;
 
