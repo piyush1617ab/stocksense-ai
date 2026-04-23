@@ -21,6 +21,7 @@ import Watchlist from "./pages/Watchlist.tsx";
 import Compare from "./pages/Compare.tsx";
 import SectorExplorer from "./pages/SectorExplorer.tsx";
 import Profile from "./pages/Profile.tsx";
+import Health from "./pages/Health.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient({
@@ -49,6 +50,7 @@ const AppContent = () => {
         <Route path="/watchlist" element={<Watchlist />} />
         <Route path="/compare" element={<Compare />} />
         <Route path="/sectors" element={<SectorExplorer />} />
+        <Route path="/health" element={<Health />} />
         <Route
           path="/portfolio"
           element={
