@@ -16,19 +16,26 @@ const StockDetail = () => {
   const { symbol } = useParams<{ symbol: string }>();
   const [searchParams] = useSearchParams();
   const exchange = searchParams.get("ex") || "NSE";
-  const { data: stock, isLoading } = useStock(symbol, exchange);
+  const { data: stock, isLoading, error } = useStock(symbol, exchange);
 
-  if (!isLoading && !stock) {
+  if (!isLoading && (!stock || error)) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-20 text-center animate-fade-in">
-          <div className="mx-auto max-w-sm">
+          <div className="mx-auto max-w-md">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent">
               <BarChart3 className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Stock not found</h2>
-            <p className="text-muted-foreground mb-6">We couldn't find data for "{symbol}"</p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Stock data unavailable</h2>
+            <p className="text-muted-foreground mb-2">
+              We couldn't load live data for "{symbol}" on {exchange}.
+            </p>
+            {error && (
+              <p className="text-xs text-muted-foreground mb-6 font-mono break-words">
+                {(error as Error).message}
+              </p>
+            )}
             <Link
               to="/"
               className="inline-flex items-center gap-2 rounded-xl gradient-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
