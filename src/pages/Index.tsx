@@ -39,7 +39,7 @@ const Index = () => {
             <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl animate-slide-up">
               Understand Stocks.
               <br />
-              <span className="gradient-text">Learn Smart Investing.</span>
+              <span className="text-muted-foreground">Learn Smart Investing.</span>
             </h1>
 
             <p className="text-muted-foreground text-lg max-w-lg mx-auto animate-slide-up">
