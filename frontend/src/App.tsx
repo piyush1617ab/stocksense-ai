@@ -1,0 +1,98 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/context/AuthContext";
+import { PortfolioProvider } from "@/context/PortfolioContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import CommandPalette from "@/components/CommandPalette";
+import AppLoader from "@/components/AppLoader";
+import { useAppReady } from "@/hooks/useAppReady";
+import Index from "./pages/Index.tsx";
+import StockDetail from "./pages/StockDetail.tsx";
+import Chatbot from "./pages/Chatbot.tsx";
+import Learn from "./pages/Learn.tsx";
+import Login from "./pages/Login.tsx";
+import Signup from "./pages/Signup.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
+import Portfolio from "./pages/Portfolio.tsx";
+import Watchlist from "./pages/Watchlist.tsx";
+import Compare from "./pages/Compare.tsx";
+import SectorExplorer from "./pages/SectorExplorer.tsx";
+import Profile from "./pages/Profile.tsx";
+import Health from "./pages/Health.tsx";
+import NotFound from "./pages/NotFound.tsx";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const AppContent = () => {
+  const ready = useAppReady();
+
+  return (
+    <AppLoader ready={ready}>
+      <CommandPalette />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/stock/:symbol" element={<StockDetail />} />
+        <Route path="/chatbot" element={<Chatbot />} />
+        <Route path="/learn" element={<Learn />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/watchlist" element={<Watchlist />} />
+        <Route path="/compare" element={<Compare />} />
+        <Route path="/sectors" element={<SectorExplorer />} />
+        <Route path="/health" element={<Health />} />
+        <Route
+          path="/portfolio"
+          element={
+            <ProtectedRoute>
+              <Portfolio />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AppLoader>
+  );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <PortfolioProvider>
+              <AppContent />
+            </PortfolioProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
+
+export default App;
