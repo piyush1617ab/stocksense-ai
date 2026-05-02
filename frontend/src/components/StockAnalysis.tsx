@@ -13,14 +13,14 @@ interface Factor {
   explanation: string;
 }
 
+// ── Shared keyword patterns for news sentiment ───────────────────────────────
+const POSITIVE_NEWS_RE = /win|crosses|improve|growth|recovery|partner|raises|milestone|announce/i;
+const NEGATIVE_NEWS_RE = /headwind|fall|drop|concern|slowdown|loss|decline/i;
+
 // ── Compute news sentiment score (−1 to +1) from headlines ──────────────────
 function computeSentimentScore(stock: StockDetail): number {
-  const positive = stock.news.filter((n) =>
-    /win|crosses|improve|growth|recovery|partner|raises|milestone|announce/i.test(n.title)
-  ).length;
-  const negative = stock.news.filter((n) =>
-    /headwind|fall|drop|concern|slowdown|loss|decline/i.test(n.title)
-  ).length;
+  const positive = stock.news.filter((n) => POSITIVE_NEWS_RE.test(n.title)).length;
+  const negative = stock.news.filter((n) => NEGATIVE_NEWS_RE.test(n.title)).length;
   const total = stock.news.length || 1;
   return parseFloat(((positive - negative) / total).toFixed(2));
 }
@@ -67,12 +67,8 @@ const getFactors = (stock: StockDetail): Factor[] => {
     explanation: `Stock moved ${stock.change >= 0 ? "+" : ""}${stock.change.toFixed(2)} (${stock.changePercent.toFixed(2)}%) today.`,
   });
 
-  const positiveNews = stock.news.filter((n) =>
-    /win|crosses|improve|growth|recovery|partner|raises|milestone|announce/i.test(n.title)
-  ).length;
-  const negativeNews = stock.news.filter((n) =>
-    /headwind|fall|drop|concern|slowdown|loss|decline/i.test(n.title)
-  ).length;
+  const positiveNews = stock.news.filter((n) => POSITIVE_NEWS_RE.test(n.title)).length;
+  const negativeNews = stock.news.filter((n) => NEGATIVE_NEWS_RE.test(n.title)).length;
   factors.push({
     label: "News Sentiment",
     signal: positiveNews > negativeNews ? "bullish" : negativeNews > positiveNews ? "bearish" : "neutral",

@@ -19,7 +19,7 @@ import argparse
 import json
 import os
 import warnings
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import joblib
@@ -180,7 +180,7 @@ def train(symbols: list[str], period: str, horizon: int) -> None:
     # Persist
     joblib.dump(pipeline, MODEL_PATH)
     meta = {
-        "trained_at":    datetime.utcnow().isoformat() + "Z",
+        "trained_at":    datetime.now(timezone.utc).isoformat(),
         "symbols":       symbols,
         "period":        period,
         "horizon_days":  horizon,

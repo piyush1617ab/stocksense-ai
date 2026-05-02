@@ -14,7 +14,7 @@ To re-generate:
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import joblib
@@ -124,7 +124,7 @@ def main() -> None:
     joblib.dump(pipeline, MODEL_PATH)
 
     meta = {
-        "trained_at":    datetime.utcnow().isoformat() + "Z",
+        "trained_at":    datetime.now(timezone.utc).isoformat(),
         "symbols":       ["synthetic"],
         "period":        "synthetic",
         "horizon_days":  5,
