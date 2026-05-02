@@ -150,7 +150,7 @@ router.post(
 );
 
 // ── POST /api/ml-predict ───────────────────────────────────────
-// Proxies to the Python ML microservice for a buy/sell prediction.
+// Proxies to the Python ML microservice for a buy/sell/hold prediction.
 // If the ML service is unreachable, responds with { mlAvailable: false }
 // so the frontend can gracefully fall back to rule-based analysis.
 router.post(
@@ -158,21 +158,26 @@ router.post(
   insightLimiter,
   wrap(async (req, res) => {
     const {
-      symbol     = "",
+      symbol          = "",
       rsi,
       price,
-      ma50       = null,
-      ma200      = null,
-      ema12      = null,
-      ema26      = null,
-      change_pct = 0,
+      ma50            = null,
+      ma200           = null,
+      ema12           = null,
+      ema26           = null,
+      change_pct      = 0,
       sentiment_score = 0,
+      volatility      = null,   // optional 20-day rolling std of % returns
+      momentum        = null,   // optional 10-day price rate-of-change (%)
     } = req.body;
 
     if (typeof rsi   !== "number") return res.status(400).json({ error: "rsi must be a number"   });
     if (typeof price !== "number") return res.status(400).json({ error: "price must be a number" });
 
-    const result = await mlPredict({ symbol, rsi, price, ma50, ma200, ema12, ema26, change_pct, sentiment_score });
+    const result = await mlPredict({
+      symbol, rsi, price, ma50, ma200, ema12, ema26,
+      change_pct, sentiment_score, volatility, momentum,
+    });
 
     if (!result) {
       // ML service unavailable — frontend must handle this gracefully

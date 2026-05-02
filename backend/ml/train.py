@@ -28,7 +28,7 @@ import pandas as pd
 import yfinance as yf
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import classification_report, precision_score, recall_score
+from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -50,6 +50,10 @@ FEATURE_COLS = [
     "macd_norm",        # (EMA12 - EMA26) / price  (normalised MACD)
     "change_pct",       # today's % change
     "sentiment_score",  # proxy: +1 if change>0 else -1 (news unavailable offline)
+    "rsi_overbought",   # 1 if RSI > 70, else 0
+    "rsi_oversold",     # 1 if RSI < 30, else 0
+    "volatility",       # 20-day rolling std of daily returns (%)
+    "momentum",         # 10-day price rate-of-change (%)
 ]
 
 MODEL_PATH = Path(__file__).parent / "model.joblib"
@@ -73,19 +77,30 @@ def calc_ema(series: pd.Series, span: int) -> pd.Series:
 def add_features(df: pd.DataFrame) -> pd.DataFrame:
     close = df["Close"]
 
-    df["rsi"]           = calc_rsi(close)
-    df["ma50"]          = close.rolling(50).mean()
-    df["ma200"]         = close.rolling(200).mean()
-    df["ema12"]         = calc_ema(close, 12)
-    df["ema26"]         = calc_ema(close, 26)
+    df["rsi"]   = calc_rsi(close)
+    df["ma50"]  = close.rolling(50).mean()
+    df["ma200"] = close.rolling(200).mean()
+    df["ema12"] = calc_ema(close, 12)
+    df["ema26"] = calc_ema(close, 26)
 
     df["price_to_ma50"]  = close / df["ma50"]
     df["price_to_ma200"] = close / df["ma200"]
     df["ema12_to_ema26"] = df["ema12"] / df["ema26"]
     df["macd_norm"]      = (df["ema12"] - df["ema26"]) / close
     df["change_pct"]     = close.pct_change() * 100
+
     # Sentiment proxy (sign of today's return; replace with real NLP score if available)
     df["sentiment_score"] = np.sign(df["change_pct"])
+
+    # RSI zone flags — help the model learn zone-specific behaviour
+    df["rsi_overbought"] = (df["rsi"] > 70).astype(float)
+    df["rsi_oversold"]   = (df["rsi"] < 30).astype(float)
+
+    # Volatility: 20-day rolling std of daily % returns (annualised would need *sqrt(252))
+    df["volatility"] = df["change_pct"].rolling(20).std()
+
+    # Momentum: 10-day price rate-of-change (%)
+    df["momentum"] = close.pct_change(10) * 100
 
     return df
 
@@ -172,6 +187,7 @@ def train(symbols: list[str], period: str, horizon: int) -> None:
 
     # Evaluation
     y_pred = pipeline.predict(X_test)
+    acc    = accuracy_score(y_test, y_pred)
     prec   = precision_score(y_test, y_pred, zero_division=0)
     rec    = recall_score(y_test, y_pred, zero_division=0)
     print("\n📊 Evaluation on held-out test set:")
@@ -187,15 +203,16 @@ def train(symbols: list[str], period: str, horizon: int) -> None:
         "features":      FEATURE_COLS,
         "train_samples": int(len(X_train)),
         "test_samples":  int(len(X_test)),
+        "accuracy":      round(float(acc), 4),
         "precision_buy": round(float(prec), 4),
         "recall_buy":    round(float(rec), 4),
-        "model_version": "1.0.0",
+        "model_version": "2.0.0",
     }
     META_PATH.write_text(json.dumps(meta, indent=2))
 
     print(f"\n✅ Model saved  → {MODEL_PATH}")
     print(f"✅ Metadata     → {META_PATH}")
-    print(f"   Precision (BUY): {prec:.2%}  |  Recall (BUY): {rec:.2%}")
+    print(f"   Accuracy: {acc:.2%}  |  Precision (BUY): {prec:.2%}  |  Recall (BUY): {rec:.2%}")
 
 
 # ─── CLI ────────────────────────────────────────────────────────────────────────

@@ -39,9 +39,13 @@ export type TimeRange = z.infer<typeof TimeRangeSchema>;
 
 export const MLPredictionSchema = z.object({
   mlAvailable:   z.boolean(),
-  signal:        z.enum(["BUY", "SELL"]).optional(),
+  signal:        z.enum(["BUY", "SELL", "HOLD"]).optional(),
   confidence:    z.number().min(0).max(1).optional(),
   probabilities: z.object({ BUY: z.number(), SELL: z.number() }).optional(),
+  top_features:  z.array(
+    z.object({ feature: z.string(), importance: z.number(), label: z.string() })
+  ).optional(),
+  explanation:   z.string().optional(),
   features_used: z.record(z.number().nullable()).optional(),
   model_version: z.string().optional(),
 });

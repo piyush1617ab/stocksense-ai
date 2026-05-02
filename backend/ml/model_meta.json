@@ -1,5 +1,5 @@
 {
-  "trained_at": "2026-05-02T21:22:35.619176Z",
+  "trained_at": "2026-05-02T22:17:02.674838+00:00",
   "symbols": [
     "synthetic"
   ],
@@ -12,12 +12,17 @@
     "ema12_to_ema26",
     "macd_norm",
     "change_pct",
-    "sentiment_score"
+    "sentiment_score",
+    "rsi_overbought",
+    "rsi_oversold",
+    "volatility",
+    "momentum"
   ],
   "train_samples": 32000,
   "test_samples": 8000,
-  "precision_buy": 0.6452,
-  "recall_buy": 0.5908,
-  "model_version": "1.0.0",
+  "accuracy": 0.6651,
+  "precision_buy": 0.7016,
+  "recall_buy": 0.6748,
+  "model_version": "2.0.0",
   "note": "Demo model trained on synthetic data. Run train.py with yfinance for production."
 }

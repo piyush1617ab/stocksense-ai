@@ -12,20 +12,22 @@ const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:8001";
 const TIMEOUT_MS     = 5000;   // fail fast if the service is down
 
 /**
- * Call the ML service for a buy/sell prediction.
+ * Call the ML service for a buy/sell/hold prediction.
  *
  * @param {object} params
  * @param {string}      params.symbol
- * @param {number}      params.rsi           0–100
- * @param {number}      params.price         current price (₹)
- * @param {number|null} params.ma50          50-day SMA (optional)
- * @param {number|null} params.ma200         200-day SMA (optional)
- * @param {number|null} params.ema12         12-day EMA  (optional)
- * @param {number|null} params.ema26         26-day EMA  (optional)
- * @param {number}      params.change_pct    today's % change
- * @param {number}      params.sentiment_score  -1 to +1
+ * @param {number}      params.rsi             0–100
+ * @param {number}      params.price           current price (₹)
+ * @param {number|null} params.ma50            50-day SMA (optional)
+ * @param {number|null} params.ma200           200-day SMA (optional)
+ * @param {number|null} params.ema12           12-day EMA  (optional)
+ * @param {number|null} params.ema26           26-day EMA  (optional)
+ * @param {number}      params.change_pct      today's % change
+ * @param {number}      params.sentiment_score -1 to +1
+ * @param {number|null} params.volatility      20-day rolling std of % returns (optional)
+ * @param {number|null} params.momentum        10-day price rate-of-change % (optional)
  *
- * @returns {Promise<{signal: string, confidence: number, probabilities: object, features_used: object, model_version: string}|null>}
+ * @returns {Promise<{signal: string, confidence: number, probabilities: object, top_features: object[], explanation: string, features_used: object, model_version: string}|null>}
  *          Returns null when the ML service is unreachable (caller uses rule-based fallback).
  */
 async function mlPredict(params) {

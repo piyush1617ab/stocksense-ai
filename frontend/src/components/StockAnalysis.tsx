@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Target, Shield, AlertTriangle, CheckCircle2, XCircle, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Cpu, RefreshCw } from "lucide-react";
+import { Target, Shield, AlertTriangle, CheckCircle2, XCircle, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Cpu, RefreshCw, PauseCircle } from "lucide-react";
 import type { StockDetail, MLPrediction } from "@/types/api";
 import { apiFetch, USE_MOCKS } from "@/lib/api";
 
@@ -173,16 +173,19 @@ const StockAnalysis = ({ stock }: Props) => {
 
   // ── Derive display values from ML result or rule-based fallback ──────────────
   const usingML   = ml?.mlAvailable === true && ml.signal !== undefined && ml.confidence !== undefined;
+  const isHold    = usingML && ml!.signal === "HOLD";
   const mlScore   = usingML ? Math.round((ml!.confidence ?? 0) * 100) : null;
   const displayScore   = usingML ? mlScore! : ruleScore;
   const displayVerdict = usingML
     ? (ml!.signal === "BUY"
         ? (mlScore! >= 70 ? "Strong Buy Signal" : "Moderate Buy Signal")
-        : (mlScore! >= 70 ? "Strong Caution"    : "Moderate Caution"))
+        : ml!.signal === "SELL"
+        ? (mlScore! >= 70 ? "Strong Caution"    : "Moderate Caution")
+        : "Hold — Monitor Closely")
     : ruleVerdict;
 
-  const isBullish = displayScore >= 60;
-  const isBearish = displayScore <= 40;
+  const isBullish = !isHold && displayScore >= 60;
+  const isBearish = !isHold && displayScore <= 40;
 
   return (
     <div className="space-y-4">
@@ -202,7 +205,10 @@ const StockAnalysis = ({ stock }: Props) => {
 
       {/* Verdict card */}
       <div className={`rounded-2xl border p-6 shadow-sm relative overflow-hidden ${
-        isBullish ? "bg-success/5 border-success/20" : isBearish ? "bg-danger/5 border-danger/20" : "bg-card"
+        isHold    ? "bg-warning/5 border-warning/20"
+        : isBullish ? "bg-success/5 border-success/20"
+        : isBearish ? "bg-danger/5 border-danger/20"
+        : "bg-card"
       }`}>
         {/* ML / rule-based badge */}
         <div className="absolute top-3 right-3">
@@ -223,9 +229,14 @@ const StockAnalysis = ({ stock }: Props) => {
 
         <div className="flex items-center gap-4">
           <div className={`flex h-14 w-14 items-center justify-center rounded-2xl shrink-0 ${
-            isBullish ? "bg-success-muted" : isBearish ? "bg-danger-muted" : "bg-muted"
+            isHold    ? "bg-warning-muted"
+            : isBullish ? "bg-success-muted"
+            : isBearish ? "bg-danger-muted"
+            : "bg-muted"
           }`}>
-            {isBullish ? (
+            {isHold ? (
+              <PauseCircle className="h-7 w-7 text-warning" />
+            ) : isBullish ? (
               <TrendingUp className="h-7 w-7 text-success" />
             ) : isBearish ? (
               <TrendingDown className="h-7 w-7 text-danger" />
@@ -236,7 +247,10 @@ const StockAnalysis = ({ stock }: Props) => {
 
           <div className="flex-1 min-w-0">
             <p className={`text-lg font-bold ${
-              isBullish ? "text-success" : isBearish ? "text-danger" : "text-foreground"
+              isHold    ? "text-warning"
+              : isBullish ? "text-success"
+              : isBearish ? "text-danger"
+              : "text-foreground"
             }`}>
               {displayVerdict}
             </p>
@@ -256,6 +270,13 @@ const StockAnalysis = ({ stock }: Props) => {
 
           <ScoreRing score={displayScore} isBullish={isBullish} isBearish={isBearish} />
         </div>
+
+        {/* ML explanation text */}
+        {usingML && ml!.explanation && (
+          <p className="mt-4 text-xs text-muted-foreground border-t border-border/60 pt-3 leading-relaxed">
+            {ml!.explanation}
+          </p>
+        )}
 
         {/* ML service error notice */}
         {mlError && (
@@ -291,11 +312,38 @@ const StockAnalysis = ({ stock }: Props) => {
               </div>
             </div>
           ))}
+
+          {/* Top ML features (only shown when ML is active) */}
+          {usingML && ml!.top_features && ml!.top_features.length > 0 && (
+            <div className="rounded-xl border bg-card p-4 shadow-sm">
+              <p className="text-sm font-medium text-foreground mb-3 flex items-center gap-1.5">
+                <Cpu className="h-3.5 w-3.5 text-primary" /> Top ML Features
+              </p>
+              <div className="space-y-2">
+                {ml!.top_features.map((tf) => (
+                  <div key={tf.feature} className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between text-xs mb-0.5">
+                        <span className="text-foreground font-medium">{tf.label}</span>
+                        <span className="text-muted-foreground">{(tf.importance * 100).toFixed(1)}%</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-primary"
+                          style={{ width: `${Math.min(tf.importance * 100 * 5, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       <p className="text-xs text-muted-foreground italic">
-        ⚠️ This is an educational analysis using {usingML ? "an ML model trained on historical patterns" : "basic rule-based indicators"}.
+        ⚠️ This is an educational analysis using {usingML ? `an ML model (v${ml!.model_version ?? "2"}) trained on historical patterns` : "basic rule-based indicators"}.
         It is NOT financial advice. Always consult a qualified advisor before making investment decisions.
       </p>
     </div>
