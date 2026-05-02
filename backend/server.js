@@ -86,11 +86,12 @@ app.use((err, _req, res, _next) => {
 
 // ── Start server ──────────────────────────────────────────────
 const server = app.listen(PORT, () => {
-  console.log(`\n🚀 StockSense AI Backend running on http://localhost:${PORT}`);
-  console.log(`   Health : http://localhost:${PORT}/health`);
-  console.log(`   Chat   : POST http://localhost:${PORT}/api/chat`);
-  console.log(`   Stream : POST http://localhost:${PORT}/api/chat/stream`);
-  console.log(`   Analyze: POST http://localhost:${PORT}/api/analyze (parallel insight+sentiment)\n`);
+  console.log(`🚀 StockSense AI Backend running on http://localhost:${PORT}`);
+  console.log(`   Health    : http://localhost:${PORT}/health`);
+  console.log(`   Chat      : POST http://localhost:${PORT}/api/chat`);
+  console.log(`   Stream    : POST http://localhost:${PORT}/api/chat/stream`);
+  console.log(`   Analyze   : POST http://localhost:${PORT}/api/analyze (parallel insight+sentiment)`);
+  console.log(`   ML Predict: POST http://localhost:${PORT}/api/ml-predict\n`);
 });
 
 // ── Graceful shutdown ─────────────────────────────────────────

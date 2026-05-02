@@ -15,6 +15,7 @@ const router = express.Router();
 const { chat, streamChat, clearHistory } = require("../ai/chatbot");
 const { generateInsight } = require("../ai/insightGenerator");
 const { analyzeSentiment } = require("../ai/sentimentAnalyzer");
+const { mlPredict } = require("../ai/mlPredictor");
 
 // ── Async error wrapper ────────────────────────────────────────
 const wrap = (fn) => (req, res, next) =>
@@ -145,6 +146,40 @@ router.post(
     ]);
 
     res.json({ insight, sentiment });
+  })
+);
+
+// ── POST /api/ml-predict ───────────────────────────────────────
+// Proxies to the Python ML microservice for a buy/sell prediction.
+// If the ML service is unreachable, responds with { mlAvailable: false }
+// so the frontend can gracefully fall back to rule-based analysis.
+router.post(
+  "/ml-predict",
+  insightLimiter,
+  wrap(async (req, res) => {
+    const {
+      symbol     = "",
+      rsi,
+      price,
+      ma50       = null,
+      ma200      = null,
+      ema12      = null,
+      ema26      = null,
+      change_pct = 0,
+      sentiment_score = 0,
+    } = req.body;
+
+    if (typeof rsi   !== "number") return res.status(400).json({ error: "rsi must be a number"   });
+    if (typeof price !== "number") return res.status(400).json({ error: "price must be a number" });
+
+    const result = await mlPredict({ symbol, rsi, price, ma50, ma200, ema12, ema26, change_pct, sentiment_score });
+
+    if (!result) {
+      // ML service unavailable — frontend must handle this gracefully
+      return res.json({ mlAvailable: false });
+    }
+
+    res.json({ mlAvailable: true, ...result });
   })
 );
 

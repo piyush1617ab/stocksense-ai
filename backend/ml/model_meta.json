@@ -1,0 +1,23 @@
+{
+  "trained_at": "2026-05-02T21:22:35.619176Z",
+  "symbols": [
+    "synthetic"
+  ],
+  "period": "synthetic",
+  "horizon_days": 5,
+  "features": [
+    "rsi",
+    "price_to_ma50",
+    "price_to_ma200",
+    "ema12_to_ema26",
+    "macd_norm",
+    "change_pct",
+    "sentiment_score"
+  ],
+  "train_samples": 32000,
+  "test_samples": 8000,
+  "precision_buy": 0.6452,
+  "recall_buy": 0.5908,
+  "model_version": "1.0.0",
+  "note": "Demo model trained on synthetic data. Run train.py with yfinance for production."
+}
