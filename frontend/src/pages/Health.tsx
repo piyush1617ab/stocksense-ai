@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { USE_MOCKS } from "@/lib/api";
 import { streamChat } from "@/services/chat";
 import { searchStocks } from "@/services/stocks";
+import { supabase } from "@/integrations/supabase/client";
 
 type Status = "idle" | "checking" | "ok" | "error";
 
@@ -51,15 +52,10 @@ const Health = () => {
     {
       key: "auth",
       name: "Auth Service",
-      description: "Session rehydration (/api/auth/me)",
+      description: "Supabase session rehydration",
       run: async () => {
-        if (USE_MOCKS) {
-          await new Promise((r) => setTimeout(r, 200));
-          return;
-        }
-        // 🔌 When wired: const { apiFetch } = await import("@/lib/api");
-        // await apiFetch("/api/auth/me");
-        throw new Error("Auth endpoint not wired yet — uncomment in src/services/auth.ts");
+        const { error } = await supabase.auth.getSession();
+        if (error) throw new Error(error.message);
       },
     },
   ];
