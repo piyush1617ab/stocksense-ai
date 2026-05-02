@@ -46,7 +46,7 @@ function withTimeout(promise, ms) {
 
 // ── Core Gemini call ──────────────────────────────────────────
 async function callGemini(prompt) {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   const result = await withTimeout(model.generateContent(prompt), TIMEOUT_MS);
   const raw = result.response.text();
   const cleaned = raw.replace(/```json|```/g, "").trim();

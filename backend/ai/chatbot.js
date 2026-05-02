@@ -15,10 +15,9 @@ const { createClient } = require("@supabase/supabase-js");
 const crypto = require("crypto");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+  : null;
 
 // ── Constants ─────────────────────────────────────────────────
 const HISTORY_LIMIT = 14; // max messages to pass to Gemini
@@ -78,6 +77,7 @@ function sanitizeInput(text) {
 
 // ── Supabase helpers ──────────────────────────────────────────
 async function saveMessage(userId, role, content) {
+  if (!supabase) return;
   const { error } = await supabase
     .from("chat_history")
     .insert({ user_id: userId, role, content });
@@ -86,6 +86,7 @@ async function saveMessage(userId, role, content) {
 }
 
 async function getHistory(userId) {
+  if (!supabase) return;
   const { data, error } = await supabase
     .from("chat_history")
     .select("role, content")
@@ -160,7 +161,7 @@ async function chat(userId, messages, stockContext = null) {
   }));
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     systemInstruction: SYSTEM_PROMPT,
   });
 
@@ -209,7 +210,7 @@ async function streamChat(userId, messages, stockContext, res) {
   }));
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     systemInstruction: SYSTEM_PROMPT,
   });
 
